@@ -1,0 +1,71 @@
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class RandomPhraseBot extends TelegramLongPollingBot {
+
+    private final String botToken = "YOUR_BOT_TOKEN";
+    private final String botUsername = "YOUR_BOT_USERNAME";
+
+    // создаем список фраз
+    private List<String> phrases = new ArrayList<String>() {{
+        add("Привет, я бот, который повторяет фразы!");
+        add("Случайная фраза 1");
+        add("Случайная фраза 2");
+        add("Случайная фраза 3");
+        add("Случайная фраза 4");
+    }};
+
+    // создаем объект Random для выбора случайных фраз
+    private Random random = new Random();
+
+    // создаем таймер для отправки сообщений в случайное время
+    private Timer timer = new Timer();
+
+    @Override
+    public void onUpdateReceived(Update update) {
+        // не используется, так как бот отправляет сообщения самостоятельно
+    }
+
+    @Override
+    public String getBotUsername() {
+        return botUsername;
+    }
+
+    @Override
+    public String getBotToken() {
+        return botToken;
+    }
+
+    // метод, который запускает таймер и отправляет сообщение в случайное время
+    public void startSendingMessages() {
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                // выбираем случайную фразу из списка
+                String phrase = phrases.get(random.nextInt(phrases.size()));
+                // создаем сообщение
+                SendMessage message = new SendMessage()
+                        .setChatId("YOUR_CHAT_ID") // замените YOUR_CHAT_ID на chat_id, куда нужно отправить сообщение
+                        .setText(phrase);
+                try {
+                    // отправляем сообщение
+                    execute(message);
+                } catch (TelegramApiException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, 0, 60000); // задержка перед первой отправкой сообщения - 0 миллисекунд, интервал между отправками - 60 000 миллисекунд (1 минута)
+    }
+
+    public static void main(String[] args) {
+        RandomPhraseBot bot = new RandomPhraseBot();
+        bot.startSendingMessages();
+    }
+}
